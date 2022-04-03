@@ -21,4 +21,19 @@ export const globalStyles = StyleSheet.create({
     fontSize: 20,
     color: "#442C2E",
   },
+  gridButton: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignContent: "center",
+    alignSelf: "center",
+    marginHorizontal: 80,
+    marginTop: 10,
+    fontFamily: "Montserrat-Medium",
+  },
+  login: {
+    marginTop: 5,
+    marginHorizontal: 0,
+    width: "50%",
+    fontFamily: "Montserrat-Medium",
+  },
 });
