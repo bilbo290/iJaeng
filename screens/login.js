@@ -233,12 +233,7 @@ const styles = StyleSheet.create({
   marginLogin: {
     marginTop: 15,
   },
-  login: {
-    marginTop: 5,
-    marginHorizontal: 0,
-    width: "50%",
-    fontFamily: "Montserrat-Medium",
-  },
+
   register: {
     marginTop: 5,
   },
