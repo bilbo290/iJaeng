@@ -23,9 +23,11 @@ import { Camera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { useNavigation } from "@react-navigation/native";
 
-export default function AddEntry({ navigation, setModalVisible: setModalVisible }) {
+export default function AddEntry({ navigation }) {
   //const { addEntryHandler } = addEntryHandler;
+
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
   const [image, setImage] = useState(null);
@@ -80,6 +82,7 @@ export default function AddEntry({ navigation, setModalVisible: setModalVisible 
   }
 
   const { open } = state;
+
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -156,10 +159,8 @@ export default function AddEntry({ navigation, setModalVisible: setModalVisible 
                 onSubmit={(values, actions) => {
                   updateDb(values, image).then(() => {
                     setTimeout(() => {
-                      actions.resetForm();
-                      setModalVisible(false);
-                      console.log("Exiting");
-                    }, 1000);
+                      navigation.navigate("Home");
+                    }, 1500);
                   });
                 }}
               >
@@ -174,7 +175,7 @@ export default function AddEntry({ navigation, setModalVisible: setModalVisible 
                       <Appbar.Action
                         icon="arrow-left"
                         onPress={() => {
-                          setModalVisible(false);
+                          navigation.navigate("Home");
                         }}
                       />
                       <Appbar.Content
@@ -260,11 +261,6 @@ export default function AddEntry({ navigation, setModalVisible: setModalVisible 
                     },
                     {
                       icon: "file-image",
-                      label: "PHOTO",
-                      onPress: pickImage,
-                    },
-                    {
-                      icon: "login",
                       label: "PHOTO",
                       onPress: pickImage,
                     },

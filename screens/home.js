@@ -174,7 +174,7 @@ export default function Home({ navigation }) {
           )}
           style={{ margin: 10 }}
         />
-        <Portal>
+        {/* <Portal>
           <Modal
             visible={visible}
             animationType="slide"
@@ -183,13 +183,13 @@ export default function Home({ navigation }) {
           >
             <AddEntry setModalVisible={setVisible} />
           </Modal>
-        </Portal>
+        </Portal> */}
         <FAB
           style={homeStyles.fab}
           icon="plus"
           onPress={() => {
             // console.log("Pressed");
-            // navigation.navigate("AddEntry");
+            navigation.navigate("AddEntry");
             //console.log(entries[0]);
             setVisible(true);
           }}
