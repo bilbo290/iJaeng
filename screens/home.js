@@ -1,5 +1,5 @@
 import React, { useState, createContext, useEffect, useCallback } from "react";
-import { StyleSheet, View, TouchableOpacity, FlatList, Modal } from "react-native";
+import { StyleSheet, View, TouchableOpacity, FlatList, Modal, SafeAreaView } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { globalStyles } from "../styles/global";
 import {
@@ -34,13 +34,6 @@ import {
 import { getAuth, signOut } from "firebase/auth";
 import AddEntry from "../screens/addEntry";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-{
-  /*--------------------------------------------------------------------------------------------*/
-}
-
-{
-  /*--------------------------------------------------------------------------------------------*/
-}
 
 {
   /*--------------------------------------------------------------------------------------------*/
@@ -55,6 +48,7 @@ export default function Home({ navigation }) {
   const hideModal = () => setVisible(false);
 
   async function getDbUsers() {
+    console.log("getDbUsers Trigger");
     let entry = [];
     const db = getFirestore();
     const auth = getAuth();
@@ -66,31 +60,42 @@ export default function Home({ navigation }) {
     const storage = getStorage();
     let i = 0;
     querySnapshot.forEach((doc) => {
-      const gsReference = ref(storage, "gs://hackathon-be340.appspot.com/" + doc.id);
-      getDownloadURL(gsReference).then((url) => {
-        console.log("URL Retrived =>" + url);
-        setUrl(url);
-      });
-
       //console.log(url);
       i += 1;
       let newEntry = {
-        tag: doc.data().tag,
         caption: doc.data().caption,
         docId: doc.id,
         key: i,
-        image: url,
+        image: null,
         member: doc.data().member,
       };
       entry.push(newEntry);
-      console.log("Entries for user :", uid, entry);
+      //console.log("Entries for user :", uid, entry);
       //console.log(entry);
     });
 
     return [entry, uid];
   }
-
+  async function getImg(entries) {
+    console.log("getImg Trigger");
+    let entryBuffer = entries;
+    const storage = getStorage();
+    for (let i = 0; i < entryBuffer.length; i++) {
+      const gsReference = ref(storage, "gs://hackathon-be340.appspot.com/" + entryBuffer[i].docId);
+      try {
+        await getDownloadURL(gsReference).then((url) => {
+          //console.log("URL Retrived =>" + url);
+          entryBuffer[i].image = url;
+        });
+      } catch {
+        console.log("Img not found");
+      }
+    }
+    //console.log(entryBuffer);
+    return entryBuffer;
+  }
   async function deleteDb(entries, key, uid) {
+    console.log("deleteDb Trigger");
     const db = getFirestore();
     const docId = entries[key - 1].docId;
     const toBeDelete = doc(db, "entries", docId);
@@ -110,20 +115,27 @@ export default function Home({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-      getDbUsers().then((res) => {
+      getDbUsers().then(async (res) => {
         const [entry, uid] = res;
         //console.log(uid);
+        let entryWithImg = await getImg(entry);
+        setEntries(entryWithImg);
         setUsername(uid);
-        setEntries(entry);
-        console.log(entries);
+        //console.log(entries);
+        //console.log(reload);
+        console.log("Updated");
       });
+      return () => {
+        console.log("cleaned up");
+        console.log("---------------------------");
+      };
     }, [visible, reload])
   );
 
   return (
     <View style={globalStyles.container}>
       <Provider>
-        <Appbar.Header style={{ backgroundColor: "#FFF" }}>
+        <Appbar.Header style={{ backgroundColor: "#442C2E" }}>
           {/* <Appbar.BackAction /> */}
           <Appbar.Action icon="account-circle" />
           <Appbar.Content title={username} subtitle="Subtitle" />
@@ -136,7 +148,7 @@ export default function Home({ navigation }) {
           renderItem={({ item }) => (
             <Card mode="outlined" style={{ marginVertical: 5, color: "#000" }}>
               <Card.Title
-                title={item.tag}
+                title={item.caption}
                 style={globalStyles.primary}
                 titleStyle={globalStyles.cardTitle}
               />
@@ -178,12 +190,14 @@ export default function Home({ navigation }) {
           onPress={() => {
             // console.log("Pressed");
             // navigation.navigate("AddEntry");
+            //console.log(entries[0]);
             setVisible(true);
           }}
         />
         <FAB
           style={homeStyles.fabLogout}
           icon="minus"
+          label="Logout"
           onPress={() => {
             const auth = getAuth();
             const uid = auth.currentUser.uid;
@@ -217,7 +231,7 @@ const homeStyles = StyleSheet.create({
     margin: 16,
     left: 0,
     bottom: 0,
-    backgroundColor: "purple",
+    backgroundColor: "#442C2E",
     fontFamily: "Athiti-Regular",
   },
   fab: {
@@ -225,7 +239,7 @@ const homeStyles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 0,
-    backgroundColor: "purple",
+    backgroundColor: "#442C2E",
     fontFamily: "Athiti-Regular",
   },
   titleText: {
